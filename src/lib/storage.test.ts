@@ -29,3 +29,15 @@ describe('penyimpanan browser',()=>{
   it('kegagalan kuota diteruskan ke UI',()=>expect(()=>saveData(createInitialData(),{setItem:()=>{throw new Error('Quota exceeded');}})).toThrow(/Quota/));
   it('validasi sebelum menulis',()=>{const d=createInitialData();d.catalog[0].watts=NaN;const setItem=vi.fn();expect(()=>saveData(d,{setItem})).toThrow(/watts/);expect(setItem).not.toHaveBeenCalled();});
 });
+
+describe('batas UTF-8 cadangan',()=>{
+  it('batas impor dan ekspor menghitung byte Unicode yang sama',()=>{
+    const data=createInitialData();
+    data.projects[0].client='展'.repeat(750000);
+    const serialized=JSON.stringify(data);
+    expect(serialized.length).toBeLessThan(2*1024*1024);
+    expect(new TextEncoder().encode(serialized).byteLength).toBeGreaterThan(2*1024*1024);
+    expect(()=>exportBackup(data)).toThrow(/2 MB/);
+    expect(()=>parseBackup(serialized)).toThrow(/2 MB/);
+  });
+});

@@ -52,6 +52,6 @@ GitHub Actions menjalankan pengujian perhitungan/cadangan, pemeriksaan TypeScrip
 
 Aplikasi tidak menggunakan login, backend, pelacakan, atau API eksternal. Data tersimpan pada localStorage browser dan perangkat yang sama. Menghapus data browser dapat menghapus proyek; gunakan **Ekspor cadangan** untuk menyimpan JSON atau memindahkannya ke perangkat lain.
 
-**Impor** memvalidasi versi dan struktur sebelum meminta konfirmasi penggantian data. Data lokal rusak tidak ditimpa otomatis: penyimpanan dijeda sampai pengguna memilih pemulihan. Jika browser menolak penyimpanan, antarmuka menampilkan kesalahan dan cadangan tetap dapat diekspor.
+**Cadangan dibatasi 2 MB dalam UTF-8.** Impor memvalidasi versi dan struktur sebelum meminta konfirmasi penggantian data. Data lokal rusak tidak ditimpa otomatis: penyimpanan dijeda sampai pengguna memilih pemulihan. Jika browser menolak penyimpanan, antarmuka menampilkan kesalahan dan cadangan tetap dapat diekspor.
 
 Struktur cadangan versi 1 memuat katalog PSU dan proyek dengan area, rangkaian, penempatan PSU, serta komponen tambahan. Data yang belum lengkap tetap dapat diedit, tetapi tidak mendapat status sesuai perhitungan.

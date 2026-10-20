@@ -1,6 +1,6 @@
 import type {AppData,ExtraComponent,LedCircuit,Project,PsuAssignment,PsuSpec,Zone} from '../types';
 export const STORAGE_KEY='huno-led-planner-v1';
-const MAX_BACKUP_LENGTH=2*1024*1024;
+const MAX_BACKUP_BYTES=2*1024*1024;
 let fallbackSequence=0;
 export function uuid():string {
   if(typeof globalThis.crypto?.randomUUID==='function')return globalThis.crypto.randomUUID();
@@ -51,10 +51,10 @@ function parseProject(value:unknown,path:string):Project {
 }
 function validateData(value:unknown):AppData {const d=record(value,'Cadangan');if(d.version!==1)return invalid('Versi cadangan','tidak didukung. Gunakan format versi 1.');return {version:1,catalog:unique(list(d.catalog,'catalog',parsePsu),'catalog'),projects:unique(list(d.projects,'projects',parseProject),'projects')};}
 export function parseBackup(serialized:string):AppData {
-  if(serialized.length>MAX_BACKUP_LENGTH)throw new Error('Ukuran cadangan melebihi batas 2 MB.');
+  if(new TextEncoder().encode(serialized).byteLength>MAX_BACKUP_BYTES)throw new Error('Ukuran cadangan melebihi batas 2 MB.');
   let parsed:unknown;try{parsed=JSON.parse(serialized) as unknown;}catch{throw new Error('File cadangan bukan JSON yang valid.');}return validateData(parsed);
 }
-export function exportBackup(data:AppData):string {const serialized=JSON.stringify(validateData(data),null,2);if(serialized.length>MAX_BACKUP_LENGTH)throw new Error('Ukuran cadangan melebihi batas 2 MB.');return serialized;}
+export function exportBackup(data:AppData):string {const serialized=JSON.stringify(validateData(data),null,2);if(new TextEncoder().encode(serialized).byteLength>MAX_BACKUP_BYTES)throw new Error('Ukuran cadangan melebihi batas 2 MB.');return serialized;}
 export function loadData(storage:Pick<Storage,'getItem'>):{data:AppData;error:string|null} {
   try{const serialized=storage.getItem(STORAGE_KEY);if(serialized===null)return {data:createInitialData(),error:null};return {data:parseBackup(serialized),error:null};}
   catch(error){const detail=error instanceof Error?error.message:'Kesalahan tidak diketahui.';return {data:createInitialData(),error:'Data browser tidak dapat dibaca: '+detail+' Penyimpanan otomatis dihentikan agar data lama tidak tertimpa.'};}

@@ -90,7 +90,7 @@ test('dashboard, mobile layout, wiring and print report remain accessible',async
 test('incomplete drafts remain editable after reload',async({page})=>{
   await planStrip(page);
   await page.getByLabel('Nama proyek',{exact:true}).fill('');
-  await page.getByLabel('Target beban PSU (%)',{exact:true}).fill('0');
+  await page.getByLabel('Target beban PSU (%)',{exact:false}).fill('0');
   await page.getByLabel('Daya satuan rangkaian 1',{exact:true}).clear();
   await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('huno-led-planner-v1')!).projects.find((p:{name:string})=>p.name==='')?.circuits[0]?.powerPerUnit)).toBe(0);
   await page.reload();
