@@ -6,9 +6,10 @@ import { analyzeProject } from './lib/electrical';
 import { createInitialData, createProject, exportBackup, loadData, parseBackup, saveData, uuid } from './lib/storage';
 import { CatalogEditor, Field, number, ProjectEditor } from './components/ProjectEditor';
 import { BillOfMaterials, PowerPlan, WiringDiagram } from './components/PowerPlan';
+import { CableGuide } from './components/CableGuide';
 
 type View='dashboard'|'projects'|'catalog'|'editor';
-type Tab='setup'|'power'|'wiring'|'bom';
+type Tab='setup'|'power'|'wiring'|'cables'|'bom';
 type ModalState={kind:'new'}|{kind:'import';data:AppData}|{kind:'confirm';title:string;description:string;action:()=>void}|null;
 const statusLabels:Record<ProjectAnalysis['status'],string>={ready:'Sesuai perhitungan',warning:'Periksa target beban',incomplete:'Perlu dilengkapi',empty:'Belum ada LED'};
 function statusClass(status:ProjectAnalysis['status']) {return status==='ready'?'ready':status==='warning'?'warning':status==='incomplete'?'error':'empty';}
@@ -79,7 +80,7 @@ export default function App() {
   }
   function resetStorage(){setModal({kind:'confirm',title:'Mulai ulang penyimpanan?',description:'Data lokal yang tidak dapat dibaca akan diganti dengan proyek contoh dan katalog awal. Impor cadangan jika Anda ingin memulihkan proyek lama.',action:()=>{setData(createInitialData());setCanSave(true);setReadError(null);navigate('dashboard');}});}
 
-  const tabs:{id:Tab;label:string;icon:typeof Lightbulb}[]=[{id:'setup',label:'Detail & LED',icon:Lightbulb},{id:'power',label:'Power supply',icon:Zap},{id:'wiring',label:'Skema koneksi',icon:Cable},{id:'bom',label:'Daftar komponen',icon:Blocks}];
+  const tabs:{id:Tab;label:string;icon:typeof Lightbulb}[]=[{id:'setup',label:'Detail & LED',icon:Lightbulb},{id:'power',label:'Power supply',icon:Zap},{id:'wiring',label:'Skema koneksi',icon:Cable},{id:'cables',label:'Panduan kabel',icon:Cable},{id:'bom',label:'Daftar komponen',icon:Blocks}];
   const statItems:{label:string;value:string;unit:string;foot:string;icon:typeof Lightbulb;test?:string}[]=view==='editor' && analysis ? [
     {label:'Beban LED DC',value:number(analysis.totalWatts),unit:'W',foot:project?.circuits.length+' rangkaian LED',icon:Lightbulb,test:'project-total-watts'},
     {label:'Kebutuhan kapasitas',value:number(analysis.requiredWatts),unit:'W',foot:'Dengan target beban '+number(project?.targetLoad??80)+'%',icon:Gauge},
@@ -138,11 +139,12 @@ export default function App() {
             {tab==='setup'&&<ProjectEditor project={project} analysis={analysis} onChange={updateProject}/>}
             {tab==='power'&&<PowerPlan project={project} catalog={data.catalog} analysis={analysis} onChange={updateProject}/>}
             {tab==='wiring'&&<WiringDiagram project={project} analysis={analysis}/>}
+            {tab==='cables'&&<CableGuide project={project} analysis={analysis} onChange={updateProject}/>}
             {tab==='bom'&&<BillOfMaterials project={project} analysis={analysis}/>}
           </div>
         </>}
       </div>
-      {view==='editor'&&project&&analysis&&<div className="print-only print-report"><div className="report-heading"><div><strong>HUNO · Rencana kelistrikan booth</strong><h1>{project.name||'Proyek tanpa nama'}</h1></div><Badge status={analysis.status}/></div><div className="report-meta"><p>Klien: {project.client||'—'} · Lokasi: {project.location||'—'}</p><p>Pameran: {dateLabel(project.eventDate)} · Dicetak: {new Intl.DateTimeFormat('id-ID',{dateStyle:'medium'}).format(new Date())}</p><p>Beban LED DC: {number(analysis.totalWatts)} W · Target beban PSU: {number(project.targetLoad)}% · PSU: {analysis.supplies.length} unit</p><p>Arus DC: 12 V = {number(analysis.currents[12])} A; 24 V = {number(analysis.currents[24])} A.</p></div>{!!analysis.issues.length&&<div className="report-warning"><strong>Catatan pemeriksaan</strong><ul>{analysis.issues.map((i,index)=><li key={index}>{i.message}</li>)}</ul></div>}<section className="report-section"><BillOfMaterials project={project} analysis={analysis}/></section><section className="report-section"><WiringDiagram project={project} analysis={analysis}/></section><p>Perencanaan sisi DC berdasarkan spesifikasi yang dimasukkan. Ukuran kabel, proteksi AC, dan konsumsi listrik AC dihitung terpisah sesuai kebutuhan pemasangan.</p></div>}
+      {view==='editor'&&project&&analysis&&<div className="print-only print-report"><div className="report-heading"><div><strong>HUNO · Rencana kelistrikan booth</strong><h1>{project.name||'Proyek tanpa nama'}</h1></div><Badge status={analysis.status}/></div><div className="report-meta"><p>Klien: {project.client||'—'} · Lokasi: {project.location||'—'}</p><p>Pameran: {dateLabel(project.eventDate)} · Dicetak: {new Intl.DateTimeFormat('id-ID',{dateStyle:'medium'}).format(new Date())}</p><p>Beban LED DC: {number(analysis.totalWatts)} W · Target beban PSU: {number(project.targetLoad)}% · PSU: {analysis.supplies.length} unit</p><p>Arus DC: 12 V = {number(analysis.currents[12])} A; 24 V = {number(analysis.currents[24])} A.</p></div>{!!analysis.issues.length&&<div className="report-warning"><strong>Catatan pemeriksaan</strong><ul>{analysis.issues.map((i,index)=><li key={index}>{i.message}</li>)}</ul></div>}<section className="report-section"><BillOfMaterials project={project} analysis={analysis}/></section><section className="report-section"><WiringDiagram project={project} analysis={analysis}/></section><section className="report-section"><CableGuide project={project} analysis={analysis}/></section><p>Perencanaan sisi DC berdasarkan spesifikasi yang dimasukkan. Ukuran kabel, proteksi AC, dan konsumsi listrik AC dihitung terpisah sesuai kebutuhan pemasangan.</p></div>}
     </main>
     {modal&&<Dialog title={modal.kind==='new'?'Buat proyek booth':modal.kind==='import'?'Impor cadangan':modal.title} onClose={()=>setModal(null)}>
       {modal.kind==='new'&&<form onSubmit={create}><div className="modal-body form-grid"><Field label="Nama proyek" wide><input autoFocus className="input" required maxLength={160} placeholder="Contoh: Booth Nusantara Expo" value={newName} onChange={e=>setNewName(e.target.value)}/></Field><Field label="Klien / penyelenggara" wide><input className="input" maxLength={160} placeholder="Opsional" value={newClient} onChange={e=>setNewClient(e.target.value)}/></Field><p className="hint">Anda dapat menambahkan area booth, LED, dan komponen setelah proyek dibuat.</p></div><div className="modal-footer"><button className="btn btn-secondary" type="button" onClick={()=>setModal(null)}>Batal</button><button className="btn btn-primary" type="submit" disabled={!newName.trim()}><Plus size={17}/>Buat proyek</button></div></form>}

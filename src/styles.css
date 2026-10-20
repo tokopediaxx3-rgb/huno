@@ -21,3 +21,42 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @page{size:A4;margin:15mm 12mm}
 @media print{:root,body{color:#172638;background:white;font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sidebar,.topbar,.page-actions,.tabs,.screen-only,.modal-backdrop,.toast,.connection-note{display:none!important}.print-only{display:block!important}.main-content{margin:0;padding:0;min-height:auto}.app-shell{min-height:auto}.print-report{width:100%;margin:0;padding:0}.print-report h1{font-size:23pt}.print-report h2{break-after:avoid;font-size:13pt}.print-report p{font-size:9pt}.panel,.supply-card,.project-card{box-shadow:none}.panel-header,.section-heading{break-after:avoid}.table-wrap{overflow:visible}.data-table{min-width:0;font-size:9pt}.data-table th{font-size:8pt}.data-table th,.data-table td{padding:8px}.data-table thead{display:table-header-group}.data-table tr{break-inside:avoid}.wiring-group,.supply-card,.alert,.bom-summary,.report-warning{break-inside:avoid}.wiring-board{padding:16px}.wiring-psu{flex-basis:135px;min-height:90px}.wiring-circuit strong{font-size:9pt}.wiring-bus{width:40px;flex-basis:40px}.meter{height:5px}.print-report a{color:inherit;text-decoration:none}}
+
+/* Cable colours are always paired with polarity and terminal labels. */
+.wiring-bus:before{background:var(--wire-positive,#dc2626);box-shadow:0 0 0 1px #b7c3cd}
+.wiring-bus:after{background:var(--wire-negative,#202a35);box-shadow:0 0 0 1px #b7c3cd}
+.wiring-circuit:before{background:var(--wire-positive,#dc2626);box-shadow:0 6px 0 var(--wire-negative,#202a35),0 6px 0 1px #b7c3cd;outline:1px solid #b7c3cd}
+.terminal-positive:before,.terminal-negative:before{content:"";display:inline-block;flex-shrink:0;width:7px;height:7px;margin-right:4px;border:1px solid #718096;border-radius:50%}
+.terminal-positive:before{background:var(--wire-positive,#dc2626)}
+.terminal-negative:before{background:var(--wire-negative,#202a35)}
+.wire-color-label{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-weight:600}
+.wire-swatch{display:inline-block;flex:0 0 15px;width:15px;height:15px;border:1px solid #8493a5;border-radius:4px}
+.wire-terminal{font-weight:650;font-variant-numeric:tabular-nums;color:#263e52}
+.wire-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}
+.wire-legend-item{display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px 16px;padding:17px;border:1px solid #dde7ee;border-radius:10px;background:#f8fafc}
+.wire-legend-item p{width:100%;margin:0;color:#72859a;font-size:12px}
+.wire-plan-editor{padding:18px;margin-bottom:22px;border:1px solid #e2e8f0;border-radius:10px}
+.wire-table{min-width:1060px}
+.wire-table td{vertical-align:top}
+.wire-table td:nth-child(3){min-width:170px}
+.wire-table td:nth-child(5){min-width:250px;max-width:360px;line-height:1.65}
+.wire-notes-editor{margin-top:24px}
+.wire-notes{padding:15px 18px;margin-top:18px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:6px}
+.wire-notes p{margin:8px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;color:#526b80}
+.wire-ac-reference{margin-top:28px;padding-top:6px;border-top:1px solid #e5eaf1}
+.wire-ac-reference>p{color:#718096;font-size:12px}
+.wire-ac-reference td:last-child{min-width:270px;line-height:1.65}
+.wire-installation-note{margin-top:18px}
+.wire-source-note{font-size:10px!important;line-height:1.7}
+.wire-source-note a{text-decoration:underline}
+@media(max-width:760px){.wire-legend{grid-template-columns:1fr}.wire-plan-editor{padding:15px}.wire-legend-item{padding:14px}.cable-guide .panel-header>svg{display:none}}
+@media print{
+  .wire-plan-editor,.wire-notes-editor{display:none!important}
+  .wire-table,.wire-ac-reference .data-table{min-width:0;table-layout:fixed;width:100%}
+  .wire-table th,.wire-table td,.wire-ac-reference .data-table th,.wire-ac-reference .data-table td{min-width:0!important;max-width:none!important;padding:6px;font-size:8pt;white-space:normal;overflow-wrap:anywhere}
+  .wire-table th:nth-child(1){width:12%}.wire-table th:nth-child(2){width:13%}.wire-table th:nth-child(3){width:20%}.wire-table th:nth-child(4){width:13%}.wire-table th:nth-child(5){width:28%}.wire-table th:nth-child(6){width:14%}
+  .wire-table .badge{font-size:7pt;white-space:normal}
+  .wire-color-label{white-space:normal}
+  .wire-legend-item,.wire-notes,.wire-installation-note{break-inside:avoid}
+  .wire-source-note{font-size:7pt!important}
+}

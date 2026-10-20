@@ -1,4 +1,5 @@
-import type {AppData,ExtraComponent,LedCircuit,Project,PsuAssignment,PsuSpec,Zone} from '../types';
+import type {AppData,ExtraComponent,LedCircuit,Project,PsuAssignment,PsuSpec,WirePlan,Zone} from '../types';
+import {DEFAULT_WIRING,isWireColor} from './wiring';
 export const STORAGE_KEY='huno-led-planner-v1';
 const MAX_BACKUP_BYTES=2*1024*1024;
 let fallbackSequence=0;
@@ -8,7 +9,7 @@ export function uuid():string {
 }
 export function createProject(name='Proyek booth baru'):Project {
   const now=new Date().toISOString();
-  return {id:uuid(),name,client:'',location:'',eventDate:'',createdAt:now,updatedAt:now,targetLoad:80,mode:'auto',zones:[{id:uuid(),name:'Area utama'}],circuits:[],assignments:[],extras:[]};
+  return {id:uuid(),name,client:'',location:'',eventDate:'',createdAt:now,updatedAt:now,targetLoad:80,mode:'auto',zones:[{id:uuid(),name:'Area utama'}],circuits:[],assignments:[],extras:[],wiring:{...DEFAULT_WIRING}};
 }
 export function createInitialData():AppData {
   const catalog:PsuSpec[]=[];
@@ -45,9 +46,15 @@ function parseCircuit(value:unknown,path:string):LedCircuit {
 function parsePsu(value:unknown,path:string):PsuSpec {const d=record(value,path),watts=finite(d.watts,path+'.watts');if(watts<=0)return invalid(path+'.watts','harus lebih besar dari nol.');return {id:id(d.id,path+'.id'),name:text(d.name,path+'.name'),voltage:voltage(d.voltage,path+'.voltage'),watts};}
 function parseAssignment(value:unknown,path:string):PsuAssignment {const d=record(value,path);return {id:id(d.id,path+'.id'),zoneId:id(d.zoneId,path+'.zoneId'),catalogId:id(d.catalogId,path+'.catalogId'),circuitIds:list(d.circuitIds,path+'.circuitIds',id)};}
 function parseExtra(value:unknown,path:string):ExtraComponent {const d=record(value,path);return {id:id(d.id,path+'.id'),name:text(d.name,path+'.name'),specification:text(d.specification,path+'.specification'),quantity:finite(d.quantity,path+'.quantity'),unit:text(d.unit,path+'.unit')};}
+function parseWirePlan(value:unknown,path:string):WirePlan {
+  const d=record(value,path);
+  if(!isWireColor(d.positiveColor))return invalid(path+'.positiveColor','warna DC tidak didukung.');
+  if(!isWireColor(d.negativeColor))return invalid(path+'.negativeColor','warna DC tidak didukung.');
+  return {positiveColor:d.positiveColor,negativeColor:d.negativeColor,notes:text(d.notes,path+'.notes')};
+}
 function parseProject(value:unknown,path:string):Project {
   const d=record(value,path);if(d.mode!=='auto'&&d.mode!=='manual')return invalid(path+'.mode','harus auto atau manual.');
-  return {id:id(d.id,path+'.id'),name:text(d.name,path+'.name'),client:text(d.client,path+'.client'),location:text(d.location,path+'.location'),eventDate:text(d.eventDate,path+'.eventDate'),createdAt:text(d.createdAt,path+'.createdAt'),updatedAt:text(d.updatedAt,path+'.updatedAt'),targetLoad:finite(d.targetLoad,path+'.targetLoad'),mode:d.mode,zones:unique(list(d.zones,path+'.zones',parseZone),path+'.zones'),circuits:unique(list(d.circuits,path+'.circuits',parseCircuit),path+'.circuits'),assignments:unique(list(d.assignments,path+'.assignments',parseAssignment),path+'.assignments'),extras:unique(list(d.extras,path+'.extras',parseExtra),path+'.extras')};
+  return {id:id(d.id,path+'.id'),name:text(d.name,path+'.name'),client:text(d.client,path+'.client'),location:text(d.location,path+'.location'),eventDate:text(d.eventDate,path+'.eventDate'),createdAt:text(d.createdAt,path+'.createdAt'),updatedAt:text(d.updatedAt,path+'.updatedAt'),targetLoad:finite(d.targetLoad,path+'.targetLoad'),mode:d.mode,zones:unique(list(d.zones,path+'.zones',parseZone),path+'.zones'),circuits:unique(list(d.circuits,path+'.circuits',parseCircuit),path+'.circuits'),assignments:unique(list(d.assignments,path+'.assignments',parseAssignment),path+'.assignments'),extras:unique(list(d.extras,path+'.extras',parseExtra),path+'.extras'),...(d.wiring===undefined?{}:{wiring:parseWirePlan(d.wiring,path+'.wiring')})};
 }
 function validateData(value:unknown):AppData {const d=record(value,'Cadangan');if(d.version!==1)return invalid('Versi cadangan','tidak didukung. Gunakan format versi 1.');return {version:1,catalog:unique(list(d.catalog,'catalog',parsePsu),'catalog'),projects:unique(list(d.projects,'projects',parseProject),'projects')};}
 export function parseBackup(serialized:string):AppData {

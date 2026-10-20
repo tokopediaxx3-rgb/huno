@@ -26,6 +26,16 @@ try {
     for(let offset=0;offset<encoded.length;offset+=4096)console.log('HUNO_IMAGE_CHUNK '+encoded.slice(offset,offset+4096));
     console.log('HUNO_PREVIEW_END '+name);
     console.log('Captured '+name+' preview: '+screenshot.length+' bytes.');
+    await page.getByRole('button',{name:/^Buka proyek /}).first().click();
+    await page.getByRole('tab',{name:'Panduan kabel',exact:true}).click();
+    await page.locator('.screen-only [data-testid="cable-guide"]').waitFor();
+    const cables=await page.screenshot({type:'jpeg',quality:80,fullPage:true,animations:'disabled'});
+    await writeFile('docs/previews/cable-guide-'+name+'.jpg',cables);
+    const encodedCables=cables.toString('base64');
+    console.log('HUNO_PREVIEW_BEGIN cables-'+name);
+    for(let offset=0;offset<encodedCables.length;offset+=4096)console.log('HUNO_IMAGE_CHUNK '+encodedCables.slice(offset,offset+4096));
+    console.log('HUNO_PREVIEW_END cables-'+name);
+    console.log('Captured cables '+name+' preview: '+cables.length+' bytes.');
     await context.close();
   }
 } finally {

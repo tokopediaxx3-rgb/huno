@@ -55,3 +55,13 @@ Aplikasi tidak menggunakan login, backend, pelacakan, atau API eksternal. Data t
 **Cadangan dibatasi 2 MB dalam UTF-8.** Impor memvalidasi versi dan struktur sebelum meminta konfirmasi penggantian data. Data lokal rusak tidak ditimpa otomatis: penyimpanan dijeda sampai pengguna memilih pemulihan. Jika browser menolak penyimpanan, antarmuka menampilkan kesalahan dan cadangan tetap dapat diekspor.
 
 Struktur cadangan versi 1 memuat katalog PSU dan proyek dengan area, rangkaian, penempatan PSU, serta komponen tambahan. Data yang belum lengkap tetap dapat diedit, tetapi tidak mendapat status sesuai perhitungan.
+
+## Panduan kabel dan warna
+
+Tab **Panduan kabel** menampilkan terminal asal–tujuan untuk setiap rangkaian yang benar-benar ditempatkan pada PSU. Default rencana DC adalah merah untuk V+ / +V menuju LED positif dan hitam untuk V− / −V menuju LED negatif. Warna DC dapat diubah per proyek; label polaritas tetap ditampilkan pada skema dan tabel. Catatan sambungan, warna, dan daftar jalur ikut pada laporan cetak serta cadangan JSON. Cadangan versi1 lama tanpa pengaturan kabel tetap didukung.
+
+Panduan DC mencakup LED satu warna dua kabel 12/24V. RGB/RGBW membutuhkan controller dan pemetaan terpisah. Jumlah jalur tidak menentukan panjang, penampang, atau kapasitas kabel; spesifikasi bahan tetap diisi manual berdasarkan pemasangan.
+
+Referensi AC dipisahkan dari alokasi DC dan berlaku untuk terminal PSU yang sesuai labelnya: acuan harmonisasi Eropa memakai cokelat untuk L, biru untuk N, serta hijau-kuning untuk PE/FG. Warna pabrik dan instalasi lokal dapat berbeda. N, PE/FG, dan V− tidak disamakan atau dihubungkan otomatis. Untuk adaptor tertutup atau PSU ClassII tanpa FG, ikuti petunjuk pabrikan. Putuskan sumber sebelum perakitan; pekerjaan AC ditangani teknisi yang kompeten.
+
+Sumber: [manual pemasangan MEAN WELL](https://www.meanwell.eu/Upload/PDF/Enclosed_Type_EN.pdf) dan [identifikasi konduktor Schneider Electric](https://www.electrical-installation.org/enwiki/Cables_and_busways).

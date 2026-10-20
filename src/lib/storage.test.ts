@@ -41,3 +41,10 @@ describe('batas UTF-8 cadangan',()=>{
     expect(()=>parseBackup(serialized)).toThrow(/2 MB/);
   });
 });
+
+describe('cadangan rencana kabel',()=>{
+  it('cadangan versi1 lama tanpa wiring tetap dapat dibuka',()=>{const d=createInitialData();delete d.projects[0].wiring;const restored=parseBackup(JSON.stringify(d));expect(restored.version).toBe(1);expect(restored.projects[0].wiring).toBeUndefined();expect(restored).toEqual(d);});
+  it('warna dan catatan dapat diekspor dan diimpor',()=>{const d=createInitialData();d.projects[0].wiring={positiveColor:'white',negativeColor:'orange',notes:'Penanda kedua ujung kabel'};expect(parseBackup(exportBackup(d))).toEqual(d);});
+  it('menolak warna yang tidak didukung atau hijau-kuning untuk DC',()=>{const d=createInitialData();for(const color of ['green-yellow','unknown',null])expect(()=>parseBackup(JSON.stringify({...d,projects:[{...d.projects[0],wiring:{positiveColor:color,negativeColor:'black',notes:''}}]}))).toThrow(/positiveColor/);});
+  it('menolak tipe catatan yang rusak',()=>{const d=createInitialData();expect(()=>parseBackup(JSON.stringify({...d,projects:[{...d.projects[0],wiring:{positiveColor:'red',negativeColor:'black',notes:4}}]}))).toThrow(/notes/);});
+});
